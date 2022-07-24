@@ -6,6 +6,7 @@ import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.ctrip.framework.apollo.spring.annotation.EnableApolloConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,18 +15,23 @@ import org.springframework.web.bind.annotation.RestController;
 import java.text.MessageFormat;
 
 /**
- * 以下兩個系統參數記得加上
+ * 以下三個系統參數記得加上
  * 第一個是對應到你要指定的appId 在apollo上
  * 第二個是對應apollo 啟動後會使用8080啟動eurekaServer 它將會做config 確認用, 當沒有設定時會使用預設 http://apollo.mete/
  * 假設沒做host 會報錯 所以直接使用以下系統參數加上後解決
  * -Dapp.id=SampleApp -Dapollo.meta=http://localhost:8080
- *
+ * 將指定環境是使用開發環境 apollo 預設4種 DEV PRO UAT FAT
+ * -Denv=DEV
  * 另外META-INF 資料夾一定要手動加上 並加入app.properties檔案指定appId
  */
 @Configuration
 @EnableApolloConfig
 @RestController
 public class ApolloConfig {
+
+    @Autowired
+    private PropertiesService service;
+
     private final Config appConfig;
     public ApolloConfig() {
         appConfig = ConfigService.getAppConfig();
@@ -51,6 +57,7 @@ public class ApolloConfig {
 
     @RequestMapping("/test")
     public ResponseEntity<String> test(){
+        System.out.println(service.getTimeout());
         return ResponseEntity.ok(appConfig.getProperty("timeout", "default"));
     }
 }
